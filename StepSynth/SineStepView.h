@@ -19,5 +19,5 @@
 - (void) animateStep:(uint)x;
 - (void) registerStep:(uint)x y:(uint)y;
 - (void) registerEnd;
-
+- (void) resetSteps;
 @end

@@ -16,7 +16,7 @@
 
 @implementation CircleSelectView
 
-@synthesize borderColor, selectedColor;
+@synthesize borderColor, selectedColor, delegate;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -37,6 +37,8 @@
 // An empty implementation adversely affects performance during animation.
 - (void)drawRect:(CGRect)rect
 {
+    [[UIColor blackColor] setFill];
+    UIRectFill(self.bounds);
     CGPoint center = CGPointMake(self.bounds.size.width / 2., self.bounds.size.height / 2.);
     float startAngle = ((float)selectedIndex) * (2. * M_PI / totalNumIndexes);
     float endAngle = ((float)selectedIndex + 1) * (2. * M_PI / totalNumIndexes);
@@ -60,15 +62,55 @@
     [selectedPath addLineToPoint:CGPointMake(center.x + cos(endAngle) * (radius - 4), center.y + sin(endAngle)  * (radius - 4))];
     [selectedPath closePath];
     [selectedPath fill];
-    // Draw a smaller circle
     
     
-    UIBezierPath * innerArc = [UIBezierPath bezierPathWithArcCenter:center radius:radius / 3. startAngle:0 endAngle: 2. * M_PI clockwise:YES];
-    
+    UIBezierPath * innerArc = [UIBezierPath bezierPathWithArcCenter:center radius:radius / 3. startAngle:0 endAngle: 2. * M_PI clockwise:YES];    
     [[UIColor blackColor] setFill];
     [innerArc fill];
-    // Drawing the filled in arc for the selected value
+}
+
+- (void) handleTouch:(NSSet *)touches withEvent:(UIEvent *)event {
+    CGPoint translate = [[touches anyObject] locationInView: self];
+    CGPoint center = CGPointMake(self.bounds.size.width / 2., self.bounds.size.height / 2.);
+    float yDiff = translate.y - center.y;
+    float xDiff = translate.x - center.x;
+    float ratio = yDiff / (xDiff != 0 ? xDiff : .1);
+    float theta = atan(ratio);
+    if (xDiff < 0) {
+        theta += M_PI;
+    }
+    if (theta < 0) {
+        theta += M_PI * 2.;
+    }
+    float i = floorf((theta / (M_PI * 2.)) * ((float)totalNumIndexes));
+    if (i != selectedIndex) {
+        selectedIndex = i;
+        [self setNeedsDisplay];
+    }
+}
+
+- (void)handleDelegation {
+    NSMethodSignature *signature = [delegate methodSignatureForSelector: selector];
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature: signature];
+    [invocation setArgument:&selectedIndex atIndex:2];
+    [invocation setSelector:selector];
+    [invocation setTarget:delegate];
+    [invocation invoke];
+}
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    [self handleTouch:touches withEvent:event];
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    [self handleTouch:touches withEvent:event];
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    [self handleDelegation];
 }
 
 
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+    [self handleDelegation];
+}
 @end

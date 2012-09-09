@@ -9,6 +9,7 @@
 #import "SineStepViewController.h"
 #import "SineStepView.h"
 #import "CircleSelectView.h"
+#import "BarSelectView.h"
 
 #import <AudioToolbox/AudioToolbox.h>
 
@@ -45,18 +46,19 @@ OSStatus RenderTone(
 	for (UInt32 frame = viewController->totalFrames; frame < totalNumFrames; frame++) 
 	{
         UInt32 x = (frame / frameToSwitch) % numSteps;
+
+        Float32 bufferValue = 0;
         if (lastX != x) {
             dispatch_async(dispatch_get_main_queue(), 
                            ^{
                                [viewController.sineStepView animateStep:x];
                            });
         }
-        Float32 bufferValue = 0;
         for (uint y = 0; y < numSteps; y += 1) {
             BOOL step = steps[x + (y * numSteps)];
             // NSLog(@"%i", step);
             bufferValue += ((Float32)step) * (sin(theta * frequencies[y])) * (1. / 16.);
-        }
+        } 
 		buffer[frame - totalFrames] = bufferValue;
 		theta += theta_increment;
         lastX = x;
@@ -67,40 +69,79 @@ OSStatus RenderTone(
     viewController->totalFrames = totalNumFrames;
 	return noErr;
 }
+// Ensures the shake is strong enough on at least two axes before declaring it a shake.
+// "Strong enough" means "greater than a client-supplied threshold" in G's.
+static BOOL L0AccelerationIsShaking(UIAcceleration* last, UIAcceleration* current, double threshold) {
+    double
+    deltaX = fabs(last.x - current.x),
+    deltaY = fabs(last.y - current.y),
+    deltaZ = fabs(last.z - current.z);
+    
+    return
+    (deltaX > threshold && deltaY > threshold) ||
+    (deltaX > threshold && deltaZ > threshold) ||
+    (deltaY > threshold && deltaZ > threshold);
+}
 
 @interface SineStepViewController () {
+    BOOL histeresisExcited;
+    UIAcceleration* lastAcceleration;
 }
+@property(retain) UIAcceleration* lastAcceleration;
 @end
 
 @implementation SineStepViewController
 
-@synthesize sineStepView;
+@synthesize sineStepView, lastAcceleration;
 - (void)viewDidLoad
 {
     theta = 0;
     totalFrames = 0;
     sampleRate = 44100;
     bpm = 200;
+    scaleType = 0;
     
     [super viewDidLoad];
-    
+    [UIAccelerometer sharedAccelerometer].delegate = self;
+
     float m = MIN(self.view.bounds.size.width, self.view.bounds.size.height);
-    SineStepView *view = [[SineStepView alloc] initWithFrame:CGRectMake(0, 0, m, m)];
-    [self setSineStepView:view];
-    numSteps = view->numSteps;
+    SineStepView *ssView = [[SineStepView alloc] initWithFrame:CGRectMake(0, 0, m, m)];
+    [self setSineStepView:ssView];
+    numSteps = ssView->numSteps;
     frequencies = malloc(sizeof(double) * numSteps);
-    const float pentatonic[5] = {0, 2, 4, 7, 9};
-    float a = pow(2, 1. / 12.);
-    for (uint i = 0; i < numSteps; i += 1) {
-        frequencies[i] = 440. * pow(a, floor((i / 5) * 12 + pentatonic[i % 5] - 12));
-    }
-    steps = view->steps;
+    [self updateFrequenciesForScaleAndShift];
+    
+    steps = ssView->steps;
     [self.view setBackgroundColor:[UIColor blackColor]];
-    float otherMin = MIN(self.view.bounds.size.height - m,  m);
-    CircleSelectView *csView = [[CircleSelectView alloc] initWithFrame:CGRectMake(CIRCLE_SELECT_VIEW_PADDING, m + CIRCLE_SELECT_VIEW_PADDING, otherMin - (CIRCLE_SELECT_VIEW_PADDING  * 2), otherMin - (CIRCLE_SELECT_VIEW_PADDING * 2))];
-    csView->totalNumIndexes = 5;
-    [self.view addSubview:view];
-    [self.view addSubview:csView];
+    float otherMin = MIN(self.view.bounds.size.height - m,  m / 3.);
+    
+    CircleSelectView *freqCSView = [[CircleSelectView alloc] initWithFrame:CGRectMake(CIRCLE_SELECT_VIEW_PADDING, m + CIRCLE_SELECT_VIEW_PADDING, otherMin - (CIRCLE_SELECT_VIEW_PADDING  * 2), otherMin - (CIRCLE_SELECT_VIEW_PADDING * 2))];
+    freqCSView->totalNumIndexes = 10;
+    freqCSView->selector = @selector(updateFrequenciesForScale:);
+    [freqCSView setDelegate:self];
+    
+    CircleSelectView *shiftCSView = [[CircleSelectView alloc] initWithFrame:CGRectMake(otherMin, m + CIRCLE_SELECT_VIEW_PADDING, otherMin - (CIRCLE_SELECT_VIEW_PADDING  * 2), otherMin - (CIRCLE_SELECT_VIEW_PADDING * 2))];
+    shiftCSView->totalNumIndexes = 5;
+    shiftCSView->selectedIndex = 0;
+    shiftCSView->selector = @selector(updateFrequenciesForShift:);
+    [shiftCSView setDelegate:self];
+    
+    CircleSelectView *scaleCSView = [[CircleSelectView alloc] initWithFrame:CGRectMake(2 * otherMin - CIRCLE_SELECT_VIEW_PADDING, m + CIRCLE_SELECT_VIEW_PADDING, otherMin - (CIRCLE_SELECT_VIEW_PADDING  * 2), otherMin - (CIRCLE_SELECT_VIEW_PADDING * 2))];
+    scaleCSView->totalNumIndexes = 5;
+    scaleCSView->selectedIndex = 0;
+    scaleCSView->selector = @selector(updateFrequenciesForScaleType:);
+    [scaleCSView setDelegate:self];
+    
+    BarSelectView *barSelectView = [[BarSelectView alloc] initWithFrame:CGRectMake(3 * otherMin - (2 * CIRCLE_SELECT_VIEW_PADDING), m + CIRCLE_SELECT_VIEW_PADDING, (self.view.bounds.size.width - (3 * otherMin - (2 * CIRCLE_SELECT_VIEW_PADDING))) - CIRCLE_SELECT_VIEW_PADDING, self.view.bounds.size.height - m - 2 *CIRCLE_SELECT_VIEW_PADDING)];
+    barSelectView->ratio = .56;
+    barSelectView->selector = @selector(updateBPM:);
+    [barSelectView setDelegate:self];
+    
+    [self.view addSubview:ssView];
+    [self.view addSubview:freqCSView];
+    [self.view addSubview:shiftCSView];
+    [self.view addSubview:scaleCSView];
+    [self.view addSubview:barSelectView];
     [self.view setNeedsDisplay];
     [self createToneUnit];
     // Stop changing parameters on the unit
@@ -110,8 +151,77 @@ OSStatus RenderTone(
     // Start playback
     err = AudioOutputUnitStart(toneUnit);
     NSAssert1(err == noErr, @"Error starting unit: %ld", err);
-
     // 
+}
+
+- (void) accelerometer:(UIAccelerometer *)accelerometer didAccelerate:(UIAcceleration *)acceleration {
+    
+    if (lastAcceleration) {
+        if (!histeresisExcited && L0AccelerationIsShaking(lastAcceleration, acceleration, 0.7)) {
+            histeresisExcited = YES;
+            
+            [self.sineStepView resetSteps];
+        } else if (histeresisExcited && !L0AccelerationIsShaking(lastAcceleration, acceleration, 0.2)) {
+            histeresisExcited = NO;
+        }
+    }
+    
+    [self setLastAcceleration:acceleration];
+}
+- (void)updateFrequenciesForScale:(uint) selIndex {
+    scale = selIndex;
+    [self updateFrequenciesForScaleAndShift];
+}
+
+- (void)updateFrequenciesForScaleType:(uint)selIndex {
+    scaleType = selIndex;
+    [self updateFrequenciesForScaleAndShift];
+}
+- (void)updateFrequenciesForScaleAndShift {
+    uint scaleLength = 0;
+    float pentatonic[5] = {0, 2, 4, 7, 9};
+    float major[4] = {0, 4, 7, 11};
+    float minor[4] = {0, 4, 7, 10};
+    float normalMajor[8] = {0, 2, 4, 5, 7, 9, 11, 12};
+    float normalMinor[8] = {0, 2, 3, 5, 7, 8, 10, 12};
+    float *scaleArr;
+    switch (scaleType) {
+        case 0:
+            scaleArr = pentatonic;
+            scaleLength = 5;
+            break;
+        case 1:
+            scaleArr = major;
+            scaleLength = 4;
+            break;
+        case 2:
+            scaleArr = minor;
+            scaleLength = 4;
+            break;
+        case 3:
+            scaleArr = normalMajor;
+            scaleLength = 8;
+            break;
+        case 4:
+        default:
+            scaleArr = normalMinor;
+            scaleLength = 8;
+            break;
+    }
+    
+    float a = pow(2, 1. / 12.);
+    for (uint i = 0; i < numSteps; i += 1) {
+        frequencies[i] = 440. * pow(a, floor(i / 5) * 12 + scaleArr[(i + shift) % scaleLength] - 12 - scale);
+    }
+}
+
+- (void)updateFrequenciesForShift:(uint) selIndex {
+    shift = selIndex;
+    [self updateFrequenciesForScaleAndShift];
+}
+
+- (void)updateBPM:(float) ratio {
+    bpm = 60 + ceil(240 * ratio);
 }
 
 - (void)createToneUnit
@@ -174,13 +284,11 @@ OSStatus RenderTone(
     // Release any retained subviews of the main view.
 }
 
+
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
-        return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
-    } else {
-        return YES;
-    }
+    return NO;
 }
 
 @end

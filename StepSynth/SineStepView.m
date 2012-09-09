@@ -70,6 +70,16 @@
     }
 }
 
+- (void) resetSteps {
+    for (uint x = 0; x < numSteps; x += 1) {
+        for (uint y = 0; y < numSteps; y += 1) {
+            [self setStep:x y:y withValue:NO];
+            [[self.subviews objectAtIndex:(y + x * numSteps)] setNeedsDisplay];
+        }
+    }
+    [self setNeedsDisplay];
+}
+
 - (void) registerStep:(uint)x y:(uint)y{
     if (!startedTouches) {
         startedTouches = YES;
@@ -85,24 +95,6 @@
 
 - (void) setStep:(uint)x y:(uint)y withValue:(BOOL)value {
     steps[x + (y * numSteps)] = value;
-}
-
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    /*
-    [[UIColor whiteColor] set];
-    UIRectFill(rect);
-    float rectDim = MIN(self.bounds.size.width, self.bounds.size.height) / numSteps;
-    for (uint x = 0; x < numSteps; x += 1) {
-        for (uint y = 0; y < numSteps; y += 1) {
-            UIBezierPath* roundedRect = [UIBezierPath bezierPathWithRoundedRect:CGRectInset(CGRectMake(x * rectDim, y * rectDim, rectDim, rectDim), SINE_STEP_PADDING, SINE_STEP_PADDING) cornerRadius:5.];
-            [[UIColor blackColor] set];
-            [roundedRect stroke];
-        }
-    }
-     */
 }
  
 - (void) handleTouch:(NSSet *)touches withEvent:(UIEvent *)event {

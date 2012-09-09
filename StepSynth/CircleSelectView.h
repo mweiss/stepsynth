@@ -12,5 +12,7 @@
 @public
     uint selectedIndex;
     uint totalNumIndexes;
+    SEL selector;
 }
+@property (nonatomic, retain) id delegate;
 @end

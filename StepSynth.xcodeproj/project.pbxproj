@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		B80A0C4215FC403200041321 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B80A0C4115FC403200041321 /* AudioToolbox.framework */; };
 		B853681B15FC5DA000D8644D /* CircleSelectView.m in Sources */ = {isa = PBXBuildFile; fileRef = B853681A15FC5DA000D8644D /* CircleSelectView.m */; };
+		B853681F15FC85F700D8644D /* BarSelectView.m in Sources */ = {isa = PBXBuildFile; fileRef = B853681E15FC85F700D8644D /* BarSelectView.m */; };
 		B8AE554215FC019B002D97CB /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B8AE554115FC019B002D97CB /* UIKit.framework */; };
 		B8AE554415FC019B002D97CB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B8AE554315FC019B002D97CB /* Foundation.framework */; };
 		B8AE554615FC019B002D97CB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B8AE554515FC019B002D97CB /* CoreGraphics.framework */; };
@@ -43,6 +44,8 @@
 		B80A0C4115FC403200041321 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		B853681915FC5DA000D8644D /* CircleSelectView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CircleSelectView.h; sourceTree = "<group>"; };
 		B853681A15FC5DA000D8644D /* CircleSelectView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CircleSelectView.m; sourceTree = "<group>"; };
+		B853681D15FC85F700D8644D /* BarSelectView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BarSelectView.h; sourceTree = "<group>"; };
+		B853681E15FC85F700D8644D /* BarSelectView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BarSelectView.m; sourceTree = "<group>"; };
 		B8AE553D15FC019B002D97CB /* StepSynth.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StepSynth.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B8AE554115FC019B002D97CB /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		B8AE554315FC019B002D97CB /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -145,6 +148,8 @@
 				B8AE558A15FC1176002D97CB /* SineStepBoxView.m */,
 				B853681915FC5DA000D8644D /* CircleSelectView.h */,
 				B853681A15FC5DA000D8644D /* CircleSelectView.m */,
+				B853681D15FC85F700D8644D /* BarSelectView.h */,
+				B853681E15FC85F700D8644D /* BarSelectView.m */,
 			);
 			path = StepSynth;
 			sourceTree = "<group>";
@@ -292,6 +297,7 @@
 				B8AE558315FC056F002D97CB /* SineStepView.m in Sources */,
 				B8AE558B15FC1176002D97CB /* SineStepBoxView.m in Sources */,
 				B853681B15FC5DA000D8644D /* CircleSelectView.m in Sources */,
+				B853681F15FC85F700D8644D /* BarSelectView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

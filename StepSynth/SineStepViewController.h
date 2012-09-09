@@ -20,6 +20,9 @@
     double bpm;
     double sampleRate;
     double theta;
+    uint scale;
+    uint shift;
+    uint scaleType;
 }
 @property (nonatomic, retain) SineStepView *sineStepView;
 @end
