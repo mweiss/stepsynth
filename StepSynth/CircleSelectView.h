@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface CircleSelectView : UIView
-
+@interface CircleSelectView : UIView {
+@public
+    uint selectedIndex;
+    uint totalNumIndexes;
+}
 @end

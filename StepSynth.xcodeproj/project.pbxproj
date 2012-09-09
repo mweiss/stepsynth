@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B80A0C4215FC403200041321 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B80A0C4115FC403200041321 /* AudioToolbox.framework */; };
+		B853681B15FC5DA000D8644D /* CircleSelectView.m in Sources */ = {isa = PBXBuildFile; fileRef = B853681A15FC5DA000D8644D /* CircleSelectView.m */; };
 		B8AE554215FC019B002D97CB /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B8AE554115FC019B002D97CB /* UIKit.framework */; };
 		B8AE554415FC019B002D97CB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B8AE554315FC019B002D97CB /* Foundation.framework */; };
 		B8AE554615FC019B002D97CB /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B8AE554515FC019B002D97CB /* CoreGraphics.framework */; };
@@ -15,12 +17,15 @@
 		B8AE555215FC019B002D97CB /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B8AE555115FC019B002D97CB /* AppDelegate.m */; };
 		B8AE555515FC019B002D97CB /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B8AE555315FC019B002D97CB /* MainStoryboard_iPhone.storyboard */; };
 		B8AE555815FC019B002D97CB /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B8AE555615FC019B002D97CB /* MainStoryboard_iPad.storyboard */; };
-		B8AE555B15FC019B002D97CB /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B8AE555A15FC019B002D97CB /* ViewController.m */; };
+		B8AE555B15FC019B002D97CB /* SineStepViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B8AE555A15FC019B002D97CB /* SineStepViewController.m */; };
 		B8AE556315FC019C002D97CB /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B8AE556215FC019C002D97CB /* SenTestingKit.framework */; };
 		B8AE556415FC019C002D97CB /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B8AE554115FC019B002D97CB /* UIKit.framework */; };
 		B8AE556515FC019C002D97CB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B8AE554315FC019B002D97CB /* Foundation.framework */; };
 		B8AE556D15FC019C002D97CB /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B8AE556B15FC019C002D97CB /* InfoPlist.strings */; };
 		B8AE557015FC019C002D97CB /* StepSynthTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B8AE556F15FC019C002D97CB /* StepSynthTests.m */; };
+		B8AE558315FC056F002D97CB /* SineStepView.m in Sources */ = {isa = PBXBuildFile; fileRef = B8AE558215FC056F002D97CB /* SineStepView.m */; };
+		B8AE558B15FC1176002D97CB /* SineStepBoxView.m in Sources */ = {isa = PBXBuildFile; fileRef = B8AE558A15FC1176002D97CB /* SineStepBoxView.m */; };
+		B8AE558D15FC11D2002D97CB /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B8AE558C15FC11D2002D97CB /* QuartzCore.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,26 +39,35 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B80A0C3F15FC400F00041321 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		B80A0C4115FC403200041321 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		B853681915FC5DA000D8644D /* CircleSelectView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CircleSelectView.h; sourceTree = "<group>"; };
+		B853681A15FC5DA000D8644D /* CircleSelectView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CircleSelectView.m; sourceTree = "<group>"; };
 		B8AE553D15FC019B002D97CB /* StepSynth.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StepSynth.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B8AE554115FC019B002D97CB /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		B8AE554315FC019B002D97CB /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		B8AE554515FC019B002D97CB /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		B8AE554915FC019B002D97CB /* StepSynth-Info.plist */ = {isa = PBXFileReference; path = "StepSynth-Info.plist"; sourceTree = "<group>"; };
+		B8AE554915FC019B002D97CB /* StepSynth-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "StepSynth-Info.plist"; sourceTree = "<group>"; };
 		B8AE554B15FC019B002D97CB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B8AE554D15FC019B002D97CB /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		B8AE554F15FC019B002D97CB /* StepSynth-Prefix.pch */ = {isa = PBXFileReference; path = "StepSynth-Prefix.pch"; sourceTree = "<group>"; };
-		B8AE555015FC019B002D97CB /* AppDelegate.h */ = {isa = PBXFileReference; path = AppDelegate.h; sourceTree = "<group>"; };
+		B8AE554F15FC019B002D97CB /* StepSynth-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "StepSynth-Prefix.pch"; sourceTree = "<group>"; };
+		B8AE555015FC019B002D97CB /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		B8AE555115FC019B002D97CB /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		B8AE555415FC019B002D97CB /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
 		B8AE555715FC019B002D97CB /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
-		B8AE555915FC019B002D97CB /* ViewController.h */ = {isa = PBXFileReference; path = ViewController.h; sourceTree = "<group>"; };
-		B8AE555A15FC019B002D97CB /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		B8AE555915FC019B002D97CB /* SineStepViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SineStepViewController.h; sourceTree = "<group>"; };
+		B8AE555A15FC019B002D97CB /* SineStepViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SineStepViewController.m; sourceTree = "<group>"; };
 		B8AE556115FC019C002D97CB /* StepSynthTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StepSynthTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B8AE556215FC019C002D97CB /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
-		B8AE556A15FC019C002D97CB /* StepSynthTests-Info.plist */ = {isa = PBXFileReference; path = "StepSynthTests-Info.plist"; sourceTree = "<group>"; };
+		B8AE556A15FC019C002D97CB /* StepSynthTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "StepSynthTests-Info.plist"; sourceTree = "<group>"; };
 		B8AE556C15FC019C002D97CB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		B8AE556E15FC019C002D97CB /* StepSynthTests.h */ = {isa = PBXFileReference; path = StepSynthTests.h; sourceTree = "<group>"; };
+		B8AE556E15FC019C002D97CB /* StepSynthTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StepSynthTests.h; sourceTree = "<group>"; };
 		B8AE556F15FC019C002D97CB /* StepSynthTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = StepSynthTests.m; sourceTree = "<group>"; };
+		B8AE558115FC056F002D97CB /* SineStepView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SineStepView.h; sourceTree = "<group>"; };
+		B8AE558215FC056F002D97CB /* SineStepView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SineStepView.m; sourceTree = "<group>"; };
+		B8AE558915FC1176002D97CB /* SineStepBoxView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SineStepBoxView.h; sourceTree = "<group>"; };
+		B8AE558A15FC1176002D97CB /* SineStepBoxView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SineStepBoxView.m; sourceTree = "<group>"; };
+		B8AE558C15FC11D2002D97CB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +75,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B80A0C4215FC403200041321 /* AudioToolbox.framework in Frameworks */,
+				B8AE558D15FC11D2002D97CB /* QuartzCore.framework in Frameworks */,
 				B8AE554215FC019B002D97CB /* UIKit.framework in Frameworks */,
 				B8AE554415FC019B002D97CB /* Foundation.framework in Frameworks */,
 				B8AE554615FC019B002D97CB /* CoreGraphics.framework in Frameworks */,
@@ -83,6 +99,9 @@
 		B8AE553215FC019B002D97CB = {
 			isa = PBXGroup;
 			children = (
+				B80A0C4115FC403200041321 /* AudioToolbox.framework */,
+				B80A0C3F15FC400F00041321 /* CoreAudio.framework */,
+				B8AE558C15FC11D2002D97CB /* QuartzCore.framework */,
 				B8AE554715FC019B002D97CB /* StepSynth */,
 				B8AE556815FC019C002D97CB /* StepSynthTests */,
 				B8AE554015FC019B002D97CB /* Frameworks */,
@@ -117,9 +136,15 @@
 				B8AE555115FC019B002D97CB /* AppDelegate.m */,
 				B8AE555315FC019B002D97CB /* MainStoryboard_iPhone.storyboard */,
 				B8AE555615FC019B002D97CB /* MainStoryboard_iPad.storyboard */,
-				B8AE555915FC019B002D97CB /* ViewController.h */,
-				B8AE555A15FC019B002D97CB /* ViewController.m */,
+				B8AE555915FC019B002D97CB /* SineStepViewController.h */,
+				B8AE555A15FC019B002D97CB /* SineStepViewController.m */,
+				B8AE558115FC056F002D97CB /* SineStepView.h */,
+				B8AE558215FC056F002D97CB /* SineStepView.m */,
 				B8AE554815FC019B002D97CB /* Supporting Files */,
+				B8AE558915FC1176002D97CB /* SineStepBoxView.h */,
+				B8AE558A15FC1176002D97CB /* SineStepBoxView.m */,
+				B853681915FC5DA000D8644D /* CircleSelectView.h */,
+				B853681A15FC5DA000D8644D /* CircleSelectView.m */,
 			);
 			path = StepSynth;
 			sourceTree = "<group>";
@@ -263,7 +288,10 @@
 			files = (
 				B8AE554E15FC019B002D97CB /* main.m in Sources */,
 				B8AE555215FC019B002D97CB /* AppDelegate.m in Sources */,
-				B8AE555B15FC019B002D97CB /* ViewController.m in Sources */,
+				B8AE555B15FC019B002D97CB /* SineStepViewController.m in Sources */,
+				B8AE558315FC056F002D97CB /* SineStepView.m in Sources */,
+				B8AE558B15FC1176002D97CB /* SineStepBoxView.m in Sources */,
+				B853681B15FC5DA000D8644D /* CircleSelectView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,7 +354,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_ARC = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -352,7 +380,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_ARC = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -443,6 +471,7 @@
 				B8AE557515FC019C002D97CB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B8AE557615FC019C002D97CB /* Build configuration list for PBXNativeTarget "StepSynthTests" */ = {
 			isa = XCConfigurationList;
@@ -451,6 +480,7 @@
 				B8AE557815FC019C002D97CB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
