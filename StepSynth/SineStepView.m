@@ -34,6 +34,7 @@
         if (bpm == 0) {
             bpm = 300;
         }
+        numSteps = DEFAULT_NUM_STEPS;
         uint totalSteps = numSteps * numSteps;
         steps = malloc(totalSteps * sizeof(BOOL));
         memset(steps, NO, sizeof(BOOL) * totalSteps);
@@ -51,7 +52,10 @@
 }
 
 - (BOOL) getStep:(uint)x y:(uint)y {
-   return steps[x + (y * numSteps)];
+    if (x + (y * numSteps) <= 255) {
+        return steps[x + (y * numSteps)];
+    }
+    return false;
 }
 
 - (void) animateStep:(uint)x {
@@ -86,7 +90,9 @@
         firstTouchValue = ![self getStep:x y:y];
     }
     [self setStep:x y:y withValue:firstTouchValue];
-    [[self.subviews objectAtIndex:(y + x * numSteps)] setNeedsDisplay];
+    if (y + x * numSteps <= 255) {
+        [[self.subviews objectAtIndex:(y + x * numSteps)] setNeedsDisplay];
+    }
 }
 
 - (void) registerEnd {
@@ -94,9 +100,11 @@
 }
 
 - (void) setStep:(uint)x y:(uint)y withValue:(BOOL)value {
-    steps[x + (y * numSteps)] = value;
+    if (x + (y * numSteps) <= 255) {
+        steps[x + (y * numSteps)] = value;
+    }
 }
- 
+
 - (void) handleTouch:(NSSet *)touches withEvent:(UIEvent *)event {
     CGPoint translate = [[touches anyObject] locationInView: self];
     float rectDim = MIN(self.bounds.size.width, self.bounds.size.height) / numSteps;
@@ -122,4 +130,18 @@
     [self registerEnd];
 }
 
+#pragma Shaking View
+- (void)motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event
+{
+    if ( event.subtype == UIEventSubtypeMotionShake )
+    {
+        [self resetSteps];
+    }
+    
+    if ( [super respondsToSelector:@selector(motionEnded:withEvent:)] )
+        [super motionEnded:motion withEvent:event];
+}
+
+- (BOOL)canBecomeFirstResponder
+{ return YES; }
 @end

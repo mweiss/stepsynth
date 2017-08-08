@@ -10,7 +10,7 @@
 #import "SineStepView.h"
 #import "CircleSelectView.h"
 #import "BarSelectView.h"
-
+#import <CoreMotion/CoreMotion.h>
 #import <AudioToolbox/AudioToolbox.h>
 
 #define CIRCLE_SELECT_VIEW_PADDING 20
@@ -38,7 +38,7 @@ OSStatus RenderTone(
     UInt32 frameToSwitch = floor( (60. *  viewController->sampleRate) / (viewController->bpm));
     UInt32 totalNumFrames = inNumberFrames + viewController->totalFrames;
     UInt32 totalFrames = viewController->totalFrames;
-    UInt32 numSteps = viewController->numSteps;
+    UInt32 numSteps = 16;
     BOOL* steps = viewController->steps;
     UInt32 lastX = (totalFrames / frameToSwitch) % numSteps;
     viewController.sineStepView->bpm = viewController->bpm;
@@ -55,7 +55,8 @@ OSStatus RenderTone(
                            });
         }
         for (uint y = 0; y < numSteps; y += 1) {
-            BOOL step = steps[x + (y * numSteps)];
+            UInt32 stepIndex = x + (y * numSteps);
+            BOOL step = steps[stepIndex % 255];
             // NSLog(@"%i", step);
             bufferValue += ((Float32)step) * (sin(theta * frequencies[y])) * (1. / 16.);
         } 
@@ -69,30 +70,29 @@ OSStatus RenderTone(
     viewController->totalFrames = totalNumFrames;
 	return noErr;
 }
-// Ensures the shake is strong enough on at least two axes before declaring it a shake.
-// "Strong enough" means "greater than a client-supplied threshold" in G's.
-static BOOL L0AccelerationIsShaking(UIAcceleration* last, UIAcceleration* current, double threshold) {
-    double
-    deltaX = fabs(last.x - current.x),
-    deltaY = fabs(last.y - current.y),
-    deltaZ = fabs(last.z - current.z);
-    
-    return
-    (deltaX > threshold && deltaY > threshold) ||
-    (deltaX > threshold && deltaZ > threshold) ||
-    (deltaY > threshold && deltaZ > threshold);
+
+@interface Dimensions : NSObject  {
+@public
+    CGRect sineStepView;
+    CGRect freqCSView;
+    CGRect shiftCSView;
+    CGRect scaleCSView;
+    CGRect barSelectView;
 }
+@end
+
+@implementation Dimensions
+
+@end
 
 @interface SineStepViewController () {
     BOOL histeresisExcited;
-    UIAcceleration* lastAcceleration;
 }
-@property(retain) UIAcceleration* lastAcceleration;
 @end
 
 @implementation SineStepViewController
 
-@synthesize sineStepView, lastAcceleration;
+@synthesize sineStepView, freqCircleSelectView, shiftCircleSelectView, scaleCircleSelectView, bpmBarSelectView;
 - (void)viewDidLoad
 {
     theta = 0;
@@ -100,42 +100,44 @@ static BOOL L0AccelerationIsShaking(UIAcceleration* last, UIAcceleration* curren
     sampleRate = 44100;
     bpm = 200;
     scaleType = 0;
+    numSteps = 16;
     
     [super viewDidLoad];
-    [UIAccelerometer sharedAccelerometer].delegate = self;
 
-    float m = MIN(self.view.bounds.size.width, self.view.bounds.size.height);
-    SineStepView *ssView = [[SineStepView alloc] initWithFrame:CGRectMake(0, 0, m, m)];
+    Dimensions *dim = [self calculate];
+    SineStepView *ssView = [[SineStepView alloc] initWithFrame:dim->sineStepView];
     [self setSineStepView:ssView];
-    numSteps = ssView->numSteps;
     frequencies = malloc(sizeof(double) * numSteps);
     [self updateFrequenciesForScaleAndShift];
     
     steps = ssView->steps;
     [self.view setBackgroundColor:[UIColor blackColor]];
-    float otherMin = MIN(self.view.bounds.size.height - m,  m / 3.);
     
-    CircleSelectView *freqCSView = [[CircleSelectView alloc] initWithFrame:CGRectMake(CIRCLE_SELECT_VIEW_PADDING, m + CIRCLE_SELECT_VIEW_PADDING, otherMin - (CIRCLE_SELECT_VIEW_PADDING  * 2), otherMin - (CIRCLE_SELECT_VIEW_PADDING * 2))];
+    CircleSelectView *freqCSView = [[CircleSelectView alloc] initWithFrame:dim->freqCSView];
     freqCSView->totalNumIndexes = 10;
     freqCSView->selector = @selector(updateFrequenciesForScale:);
     [freqCSView setDelegate:self];
+    [self setFreqCircleSelectView:freqCSView];
     
-    CircleSelectView *shiftCSView = [[CircleSelectView alloc] initWithFrame:CGRectMake(otherMin, m + CIRCLE_SELECT_VIEW_PADDING, otherMin - (CIRCLE_SELECT_VIEW_PADDING  * 2), otherMin - (CIRCLE_SELECT_VIEW_PADDING * 2))];
+    CircleSelectView *shiftCSView = [[CircleSelectView alloc] initWithFrame:dim->shiftCSView];
     shiftCSView->totalNumIndexes = 5;
     shiftCSView->selectedIndex = 0;
     shiftCSView->selector = @selector(updateFrequenciesForShift:);
     [shiftCSView setDelegate:self];
+    [self setShiftCircleSelectView:shiftCSView];
     
-    CircleSelectView *scaleCSView = [[CircleSelectView alloc] initWithFrame:CGRectMake(2 * otherMin - CIRCLE_SELECT_VIEW_PADDING, m + CIRCLE_SELECT_VIEW_PADDING, otherMin - (CIRCLE_SELECT_VIEW_PADDING  * 2), otherMin - (CIRCLE_SELECT_VIEW_PADDING * 2))];
+    CircleSelectView *scaleCSView = [[CircleSelectView alloc] initWithFrame:dim->scaleCSView];
     scaleCSView->totalNumIndexes = 5;
     scaleCSView->selectedIndex = 0;
     scaleCSView->selector = @selector(updateFrequenciesForScaleType:);
     [scaleCSView setDelegate:self];
+    [self setScaleCircleSelectView:scaleCSView];
     
-    BarSelectView *barSelectView = [[BarSelectView alloc] initWithFrame:CGRectMake(3 * otherMin - (2 * CIRCLE_SELECT_VIEW_PADDING), m + CIRCLE_SELECT_VIEW_PADDING, (self.view.bounds.size.width - (3 * otherMin - (2 * CIRCLE_SELECT_VIEW_PADDING))) - CIRCLE_SELECT_VIEW_PADDING, self.view.bounds.size.height - m - 2 *CIRCLE_SELECT_VIEW_PADDING)];
+    BarSelectView *barSelectView = [[BarSelectView alloc] initWithFrame:dim->barSelectView];
     barSelectView->ratio = .56;
     barSelectView->selector = @selector(updateBPM:);
     [barSelectView setDelegate:self];
+    [self setBpmBarSelectView:barSelectView];
     
     [self.view addSubview:ssView];
     [self.view addSubview:freqCSView];
@@ -146,28 +148,26 @@ static BOOL L0AccelerationIsShaking(UIAcceleration* last, UIAcceleration* curren
     [self createToneUnit];
     // Stop changing parameters on the unit
     OSErr err = AudioUnitInitialize(toneUnit);
-    NSAssert1(err == noErr, @"Error initializing unit: %ld", err);
+    NSAssert1(err == noErr, @"Error initializing unit: %d", err);
     
     // Start playback
     err = AudioOutputUnitStart(toneUnit);
-    NSAssert1(err == noErr, @"Error starting unit: %ld", err);
+    NSAssert1(err == noErr, @"Error starting unit: %d", err);
     // 
 }
 
-- (void) accelerometer:(UIAccelerometer *)accelerometer didAccelerate:(UIAcceleration *)acceleration {
-    
-    if (lastAcceleration) {
-        if (!histeresisExcited && L0AccelerationIsShaking(lastAcceleration, acceleration, 0.7)) {
-            histeresisExcited = YES;
-            
-            [self.sineStepView resetSteps];
-        } else if (histeresisExcited && !L0AccelerationIsShaking(lastAcceleration, acceleration, 0.2)) {
-            histeresisExcited = NO;
-        }
-    }
-    
-    [self setLastAcceleration:acceleration];
+- (void) viewWillAppear:(BOOL)animated
+{
+    [sineStepView becomeFirstResponder];
+    [super viewWillAppear:animated];
 }
+
+- (void) viewWillDisappear:(BOOL)animated
+{
+    [sineStepView resignFirstResponder];
+    [super viewWillDisappear:animated];
+}
+
 - (void)updateFrequenciesForScale:(uint) selIndex {
     scale = selIndex;
     [self updateFrequenciesForScaleAndShift];
@@ -224,6 +224,60 @@ static BOOL L0AccelerationIsShaking(UIAcceleration* last, UIAcceleration* curren
     bpm = 60 + ceil(240 * ratio);
 }
 
+- (Dimensions *) calculate {
+    Dimensions * dim = [Dimensions new];
+    BOOL landscape = self.view.bounds.size.width > self.view.bounds.size.height;
+    float m = MIN(self.view.bounds.size.width, self.view.bounds.size.height);
+    float otherMin = !landscape ? MIN(self.view.bounds.size.height - m,  m / 3.) : self.view.bounds.size.height / 4;
+    float initYOffset = MAX(18, (self.view.bounds.size.height - m - otherMin - 18.) / 2.);
+    
+    if (landscape) {
+        dim->sineStepView = CGRectMake(0, 0, m, m);
+        dim->freqCSView = CGRectMake(m + 2 * CIRCLE_SELECT_VIEW_PADDING, initYOffset, otherMin - (CIRCLE_SELECT_VIEW_PADDING  * 2), otherMin - (CIRCLE_SELECT_VIEW_PADDING * 2));
+        dim->shiftCSView = CGRectMake(m + 2 * CIRCLE_SELECT_VIEW_PADDING, initYOffset + otherMin, otherMin - (CIRCLE_SELECT_VIEW_PADDING  * 2), otherMin - (CIRCLE_SELECT_VIEW_PADDING * 2));
+        dim->scaleCSView = CGRectMake(m + 2 * CIRCLE_SELECT_VIEW_PADDING, initYOffset + 2 * otherMin, otherMin - (CIRCLE_SELECT_VIEW_PADDING  * 2), otherMin - (CIRCLE_SELECT_VIEW_PADDING * 2));
+        dim->barSelectView = CGRectMake(m + 2 * CIRCLE_SELECT_VIEW_PADDING + otherMin / 3, initYOffset + 3 * otherMin, 30, otherMin - 50);
+    } else {
+        dim->sineStepView = CGRectMake(0, initYOffset, m, m);
+        dim->freqCSView = CGRectMake(CIRCLE_SELECT_VIEW_PADDING, m + CIRCLE_SELECT_VIEW_PADDING + initYOffset, otherMin - (CIRCLE_SELECT_VIEW_PADDING  * 2), otherMin - (CIRCLE_SELECT_VIEW_PADDING * 2));
+        dim->shiftCSView = CGRectMake(otherMin, m + CIRCLE_SELECT_VIEW_PADDING + initYOffset, otherMin - (CIRCLE_SELECT_VIEW_PADDING  * 2), otherMin - (CIRCLE_SELECT_VIEW_PADDING * 2));
+        dim->scaleCSView = CGRectMake(2 * otherMin - CIRCLE_SELECT_VIEW_PADDING, m + CIRCLE_SELECT_VIEW_PADDING + initYOffset, otherMin - (CIRCLE_SELECT_VIEW_PADDING  * 2), otherMin - (CIRCLE_SELECT_VIEW_PADDING * 2));
+        dim->barSelectView = CGRectMake(3 * otherMin - (2 * CIRCLE_SELECT_VIEW_PADDING), m + CIRCLE_SELECT_VIEW_PADDING + initYOffset, (self.view.bounds.size.width - (3 * otherMin - (2 * CIRCLE_SELECT_VIEW_PADDING))) - CIRCLE_SELECT_VIEW_PADDING, MIN(self.view.bounds.size.height - m - 2 *CIRCLE_SELECT_VIEW_PADDING - 4, otherMin));
+    }
+    return dim;
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id <UIViewControllerTransitionCoordinator>)coordinator
+{
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    
+    // Code here will execute before the rotation begins.
+    // Equivalent to placing it in the deprecated method -[willRotateToInterfaceOrientation:duration:]
+    
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        
+        // Place code here to perform animations during the rotation.
+        // You can pass nil or leave this block empty if not necessary.
+        
+    } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        Dimensions *dim = [self calculate];
+        self.sineStepView.frame = dim->sineStepView;
+        self.freqCircleSelectView.frame = dim->freqCSView;
+        self.shiftCircleSelectView.frame = dim->shiftCSView;
+        self.scaleCircleSelectView.frame = dim->scaleCSView;
+        self.bpmBarSelectView.frame = dim->barSelectView;
+        [self.view setNeedsDisplay];
+        [self.sineStepView setNeedsDisplay];
+        [self.freqCircleSelectView setNeedsDisplay];
+        [self.shiftCircleSelectView setNeedsDisplay];
+        [self.scaleCircleSelectView setNeedsDisplay];
+        [self.bpmBarSelectView setNeedsDisplay];
+        // Code here will execute after the rotation has finished.
+        // Equivalent to placing it in the deprecated method -[didRotateFromInterfaceOrientation:]
+        
+    }];
+}
+
 - (void)createToneUnit
 {
 	// Configure the search parameters to find the default playback output unit
@@ -242,7 +296,7 @@ static BOOL L0AccelerationIsShaking(UIAcceleration* last, UIAcceleration* curren
 	
 	// Create a new unit based on this that we'll use for output
 	OSErr err = AudioComponentInstanceNew(defaultOutput, &toneUnit);
-	NSAssert1(toneUnit, @"Error creating unit: %ld", err);
+	NSAssert1(toneUnit, @"Error creating unit: %d", err);
 	
 	// Set our tone rendering function on the unit
 	AURenderCallbackStruct input;
@@ -254,7 +308,7 @@ static BOOL L0AccelerationIsShaking(UIAcceleration* last, UIAcceleration* curren
                                0, 
                                &input, 
                                sizeof(input));
-	NSAssert1(err == noErr, @"Error setting callback: %ld", err);
+	NSAssert1(err == noErr, @"Error setting callback: %d", err);
 	
 	// Set the format to 32 bit, single channel, floating point, linear PCM
 	const int four_bytes_per_float = 4;
@@ -275,20 +329,13 @@ static BOOL L0AccelerationIsShaking(UIAcceleration* last, UIAcceleration* curren
                                 0,
                                 &streamFormat,
                                 sizeof(AudioStreamBasicDescription));
-	NSAssert1(err == noErr, @"Error setting stream format: %ld", err);
+	NSAssert1(err == noErr, @"Error setting stream format: %d", err);
 }
 
 - (void)viewDidUnload
 {
     [super viewDidUnload];
     // Release any retained subviews of the main view.
-}
-
-
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return NO;
 }
 
 @end
